@@ -1,0 +1,101 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "timer.h"
+
+double **matriz = 0;
+int N;
+
+void eliminacaoDeGauss() {
+
+	// realiza a eliminação de Gauss: Forma Escalonada
+	int i = 0, j = 0, k = 0;
+	double factor = 0;
+	double temp = 0;
+	int count = 0;
+
+	for (i = 0; i < N - 1; i++) {
+		if (matriz[i][i] == 0) {
+			for (k = i; k < N; k++) {
+				if (matriz[k][i] != 0) {
+					for (j = 0; j < N; j++) {
+						temp = matriz[i][j];
+						matriz[i][j] = matriz[k][j];
+						matriz[k][j] = temp;
+					}
+					k = N;
+				}
+			}
+			count++;
+		}
+
+		if (matriz[i][i] != 0) {
+			for (k = i + 1; k < N; k++) {
+				factor = -1.0 * matriz[k][i] / matriz[i][i];
+				for (j = i; j < N; j++) {
+					matriz[k][j] = matriz[k][j] + (factor * matriz[i][j]);
+				}
+			}
+		}
+	}
+}
+
+int main(void) {
+	int i = 0, j = 0;
+	double inicio, fim;
+
+	FILE *matrizDeEntrada;
+	FILE *matrizEscalonada;
+
+	printf("dimensao => ");
+	scanf("%d", &N);
+
+	matriz = (double**) malloc(sizeof(double*) * N);
+	for (i = 0; i < N; i++) {
+		matriz[i] = (double*) malloc(sizeof(double) * N);
+	}
+
+	for (i = 0; i < N; i++) {
+		for (j = 0; j < N; j++) {
+			matriz[i][j] = 1 + (rand() % 10);
+		}
+	}
+
+	// mostra a matriz digitada
+	matrizDeEntrada = fopen("matrizDeEntrada.txt", "w");
+	if (matrizDeEntrada == NULL) {
+		printf("Erro na abertura do arquivo matrizDeEntrada.txt!");
+		return 1;
+	}
+	for (i = 0; i < N; i++) {
+		for (j = 0; j < N; j++) {
+			fprintf(matrizDeEntrada, "%f ", matriz[i][j]);
+		}
+		fprintf(matrizDeEntrada, "%s\n", "");
+	}
+
+	GET_TIME(inicio);
+	eliminacaoDeGauss();
+	GET_TIME(fim);
+	fim -=inicio;
+	printf("tempo: %f\n", fim);
+
+	// mostra a matriz escalonada
+	matrizEscalonada = fopen("matrizEscalonada.txt", "w");
+	if (matrizEscalonada == NULL) {
+		printf("Erro na abertura do arquivo matrizEscalonada.txt!");
+		return 1;
+	}
+	for (i = 0; i < N; i++) {
+		for (j = 0; j < N; j++) {
+			fprintf(matrizEscalonada, "%f ", matriz[i][j]);
+		}
+		fprintf(matrizDeEntrada, "%s\n", "");
+	}
+
+	fclose(matrizDeEntrada);
+	fclose(matrizEscalonada);
+	free(matriz);
+
+	return 0;
+}
